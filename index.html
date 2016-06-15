@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<style>
+    .mapboxgl-popup {
+        max-width: 400px;
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+
+    .marker-title {
+        font-weight: 700;
+    }
+</style>
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoicGh5c2ljc2lzdGljIiwiYSI6ImNpcGdjcHdscTAwMWJ0eG00cnIxdmV5dHcifQ.cdtzWVt1VqplHx40TLRh4Q';
+var markers = {
+    "type": "FeatureCollection",
+    "features": [{
+        "type": "Feature",
+        "properties": {
+            "description": "<p>JOY LUCK PALACE</p>",
+            "marker-symbol": "restaurant",
+            "marker-color": "#3bb2d0",
+            "marker-size": "large"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-73.997287, 40.717135]
+        }
+    }, {
+        "type": "Feature",
+        "properties": {
+            "description": "<div class=\"marker-title\"><a href=\"http://jy.pe/hard-times-sundaes\" target=\"_blank\" title=\"Opens in a new window\">HARD TIMES SUNDAES</a></div><p>230 PARK AVENUE, MANHATTAN</p>",
+            "marker-symbol": "restaurant",
+            "marker-color": "#63b6e5",
+            "marker-size": "large"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-73.976106, 40.754393]
+        }
+    }]
+};
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v8',
+    center: [-73.985, 40.74562],
+    zoom: 12
+});
+
+map.on('load', function() {
+    // Add marker data as a new GeoJSON source.
+    map.addSource("markers", {
+        "type": "geojson",
+        "data": markers
+    });
+
+    // Add a layer showing the markers.
+    map.addLayer({
+        "id": "markers",
+        "type": "symbol",
+        "source": "markers",
+        "layout": {
+            "icon-image": "{marker-symbol}-15",
+            "icon-allow-overlap": true
+        }
+    });
+});
+
+// Create a popup, but don't add it to the map yet.
+var popup = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false
+});
+
+map.on('mousemove', function(e) {
+    var features = map.queryRenderedFeatures(e.point, { layers: ['markers'] });
+    // Change the cursor style as a UI indicator.
+    map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+
+    if (!features.length) {
+        popup.remove();
+        return;
+    }
+
+    var feature = features[0];
+
+    // Populate the popup and set its coordinates
+    // based on the feature found.
+    popup.setLngLat(feature.geometry.coordinates)
+        .setHTML(feature.properties.description)
+        .addTo(map);
+});
+</script>
+
+</body>
+</html>
